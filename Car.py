@@ -1,12 +1,12 @@
 from dataclasses import dataclass
-
+from typing import List
 
 @dataclass(slots=True)
 class Car:
-    Name: str
+    name: str
     url: str
     price: int
     year: int
-    numberplate: str
+    potential_numberplate: List[str]
     mileage: int
     owners: int
