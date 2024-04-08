@@ -13,8 +13,8 @@ import requests
 
 class AutoTraderScraper(CarScraper):
     def __init__(self, driver: webdriver, postcode: str, radius: int, year_from: int, year_to: int, price_from: int,
-                 price_to: int,
-                 car_list: List[Dict[str, str]]):
+                 price_to: int, car_list: List[Dict[str, str]]):
+        super().__init__()
         self.driver = driver
         self.postcode = postcode
         self.radius = radius
@@ -29,19 +29,15 @@ class AutoTraderScraper(CarScraper):
                     f"{self.radius}&sort=relevance&year-from={self.year_from}")
 
     def scrape(self):
-        self.driver.get(self.url)
-        time.sleep(5)
-        source = self.driver.page_source
-        content = BeautifulSoup(source, "html.parser")
+        content = self.get_page_content()
         number_of_pages = int(content.find("p", attrs={"data-testid": "pagination-show"}).text.split()[-1])
         if number_of_pages == 0:
             print("No results found.")
 
         for page_number in range(1, number_of_pages + 1):
-            self.driver.get(f"{self.url}&page={page_number}")
+            self.url = f"{self.url}&page={page_number}"
             time.sleep(5)
-            page_source = self.driver.page_source
-            content = BeautifulSoup(page_source, "html.parser")
+            content = self.get_page_content()
 
             articles = content.find_all("section", attrs={"data-testid": "trader-seller-listing"})
 
