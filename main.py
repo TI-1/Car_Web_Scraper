@@ -1,16 +1,15 @@
-# This is a sample Python script.
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from AutoTraderScraper import AutoTraderScraper as ATS
+from GumTreeScraper import GumTreeScraper as GTS
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
-
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    chrome_options = Options()
+    chrome_options.add_argument("_tt_enable_cookies=1")
+    driver = webdriver.Chrome(executable_path='chromedriver.exe')
+    # autotrader = ATS(driver, "DA99EZ", 20, 2012, 2014, 500, 2500, [])
+    # autotrader.scrape()
+    # print(autotrader.cars())
+    gumtree = GTS(driver, "DA99EZ", 15, 500, 2500)
+    gumtree.scrape()
+    print(gumtree.cars)
