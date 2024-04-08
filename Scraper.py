@@ -3,9 +3,15 @@ from abc import ABC, abstractmethod
 from typing import List
 import numpy.typing as npt
 import simplelpr
+import time
+from bs4 import BeautifulSoup
 
 
 class CarScraper(ABC):
+    def __init__(self):
+        self.url = None
+        self.driver = None
+
     @property
     @abstractmethod
     def cars(self):
@@ -14,6 +20,13 @@ class CarScraper(ABC):
     @abstractmethod
     def scrape(self):
         pass
+
+    def get_page_content(self) -> BeautifulSoup:
+        self.driver.get(self.url)
+        time.sleep(5)
+        source = self.driver.page_source
+        content = BeautifulSoup(source, "html.parser")
+        return content
 
     def numberplate_detector(self, image):
         try:
@@ -29,7 +42,6 @@ class CarScraper(ABC):
             proc.cropToPlateRegionEnabled = True
             cds = proc.analyze(image)
             plates = [cm.text.replace(" ", "") for cand in cds for cm in cand.matches]
-
             if plates:
                 return self.fix_number_plate(plates[0])
             else:
@@ -40,10 +52,11 @@ class CarScraper(ABC):
 
     def get_numberplate(self, images: List[npt.NDArray]) -> List[str]:
         number_plates = []
-        for image in images:
-            plate = self.numberplate_detector(image)
-            if plate:
-                number_plates.append(plate)
+        if len(images) != 0:
+            for image in images:
+                plate = self.numberplate_detector(image)
+                if plate:
+                    number_plates.append(plate)
         return number_plates
 
     @abstractmethod
