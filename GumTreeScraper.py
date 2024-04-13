@@ -9,6 +9,7 @@ from Car import Car
 import re
 import numpy as np
 import cv2
+from car_dictionary import Car_Dict
 
 
 class GumTreeScraper(CarScraper):
@@ -53,9 +54,10 @@ class GumTreeScraper(CarScraper):
                 car_numberplate = self.get_numberplate(car_images)
                 car_price = article.find("div", {"data-testid": "price"}).text
                 car_name = article.find("div", {"data-q": "tile-title"}).text
+                list_car_name = self.parse_car_name(car_name)
                 car_url = article.find("a", {"data-q": "search-result-anchor"}).get("href")
                 self._cars.append(
-                    Car(name=car_name, price=int(car_price.replace("£", "").replace(",", "")), url=car_url,
+                    Car(car_name=car_name,listing_name=list_car_name, price=int(car_price.replace("£", "").replace(",", "")), url=car_url,
                         year=re.sub(r"\s(\(\d\d reg\))", "", car_year),
                         mileage=car_mileage.replace(",", "").replace(" miles", ""),
                         owners=0, potential_numberplate=car_numberplate))
@@ -65,8 +67,8 @@ class GumTreeScraper(CarScraper):
 
     def get_image_sources(self, page_element) -> List[npt.NDArray]:
         images = []
-        source = page_element.find("img").get("data-src")
         try:
+            source = page_element.find("img").get("data-src")
             image_data = requests.get(source).content
             jpg_as_np = np.frombuffer(image_data, dtype=np.uint8)
             img = cv2.imdecode(jpg_as_np, flags=1)
@@ -77,3 +79,12 @@ class GumTreeScraper(CarScraper):
         except requests.exceptions.RequestException as err:
             print(err)
         return images
+
+    @staticmethod
+    def parse_car_name(car_name: str):
+        for key in Car_Dict:
+            if key.upper() in car_name.upper():
+                for item in Car_Dict[key]["Model"]:
+                    if item.upper() in car_name.upper():
+                        return f"{key} {item}"
+        return car_name
